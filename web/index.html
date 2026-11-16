@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数据平台任务成本分摊与修订追溯（虚构数据）</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">◧</span>
+    <div>
+      <h1>任务成本分摊与修订追溯</h1>
+      <p class="subtitle">共享成本只记一次 · 失败/投机/重算用量不抹除 · 报告绑定固定证据版</p>
+    </div>
+  </div>
+  <div class="controls">
+    <label>证据版
+      <select id="evSelect"></select>
+    </label>
+    <label>分摊方案
+      <select id="schemeSelect">
+        <option value="OCCUPANCY">按资源占用</option>
+        <option value="MARGINAL">边际需求（Shapley）</option>
+        <option value="CAUSAL">因果归责 + 公共池</option>
+      </select>
+    </label>
+    <button id="btnVerify" class="ghost">完整性校验</button>
+  </div>
+</header>
+
+<div class="verify-banner" id="verifyBanner" hidden></div>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="overview">① 总览与守恒</button>
+  <button class="tab" data-tab="dag">② 任务图与执行下钻</button>
+  <button class="tab" data-tab="compare">③ 方案比较与取舍</button>
+  <button class="tab" data-tab="revisions">④ 修订追溯与证据链</button>
+</nav>
+
+<main>
+  <!-- ===================== 总览 ===================== -->
+  <section id="tab-overview" class="tab-panel active">
+    <div class="ev-meta" id="evMeta"></div>
+    <div class="kpi-row" id="kpiRow"></div>
+
+    <h2 class="section-title">产品成本归集（含公共成本池）</h2>
+    <div class="table-wrap">
+      <table id="productTable">
+        <thead><tr id="productHead"></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>方案公平性与可追溯性说明</h3>
+        <div id="schemeMeta"></div>
+      </div>
+      <div class="card">
+        <h3>守恒核对</h3>
+        <div id="conservationBox"></div>
+      </div>
+    </div>
+
+    <h2 class="section-title">逐尝试分摊明细（可按成本类别筛选）</h2>
+    <div class="filters" id="lineFilters"></div>
+    <div class="table-wrap">
+      <table id="lineTable">
+        <thead><tr>
+          <th>尝试</th><th>任务</th><th>类型</th><th>状态</th><th>成本类别</th>
+          <th class="num">金额</th><th>计价来源</th><th>分摊去向与原因</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== DAG ===================== -->
+  <section id="tab-dag" class="tab-panel">
+    <div class="dag-hint">
+      点击任务节点查看其受益产品结构、成本构成与执行尝试；
+      边标签为需求量，<em>虚线边</em>表示 EV2 追溯更正补录。
+    </div>
+    <div class="dag-layout">
+      <svg id="dagSvg" viewBox="0 0 980 560"></svg>
+      <aside class="card detail-panel" id="dagDetail">
+        <p class="placeholder">点击左侧任务节点查看详情</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== 方案比较 ===================== -->
+  <section id="tab-compare" class="tab-panel">
+    <h2 class="section-title">同一证据版下三种方案并排比较</h2>
+    <p class="muted">三方案总额严格一致（守恒），差异只在产品/公共池之间的责任分布。</p>
+    <div class="table-wrap">
+      <table id="compareTable">
+        <thead></thead><tbody></tbody>
+      </table>
+    </div>
+    <div class="cards-3" id="schemeCompareCards"></div>
+  </section>
+
+  <!-- ===================== 修订 ===================== -->
+  <section id="tab-revisions" class="tab-panel">
+    <h2 class="section-title">证据版时间线与哈希链</h2>
+    <div id="timeline"></div>
+
+    <h2 class="section-title">跨版本 / 跨方案报告比较</h2>
+    <div class="diff-controls">
+      <label>报告 A <select id="diffA"></select></label>
+      <span class="arrow">→</span>
+      <label>报告 B <select id="diffB"></select></label>
+      <button id="btnDiff" class="ghost">比较</button>
+    </div>
+    <div class="table-wrap">
+      <table id="diffTable">
+        <thead></thead><tbody></tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title">仅追加台账（确认动作不可回退）</h2>
+    <div class="table-wrap">
+      <table id="ledgerTable">
+        <thead><tr><th>#</th><th>时间</th><th>事件</th><th>内容</th><th>本条哈希</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title">报告确认</h2>
+    <div class="confirm-row" id="confirmRow"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  本系统全部账单、任务与产品均为虚构数据，仅用于演示成本分摊与修订追溯机制 ·
+  金额单位为分，界面换算为元 · 证据与报告写一次，修订只产生新版本
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

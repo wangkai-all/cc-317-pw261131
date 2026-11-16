@@ -32,3 +32,6 @@ test-results/
 *.sqlite3-shm
 *.sqlite3-journal
 !*.traineddata.gz
+
+# 本项目运行时数据（证据/报告/台账均为生成物，可由 seed 重建）
+/data/
